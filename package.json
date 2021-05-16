@@ -2,7 +2,7 @@
   "name": "facebook-post-rest-api",
   "version": "1.0.0",
   "description": "A RESTful API that supports the posts functionality of Facebook.",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
