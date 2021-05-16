@@ -1,0 +1,15 @@
+{
+  "name": "facebook-post-rest-api",
+  "version": "1.0.0",
+  "description": "A RESTful API that supports the posts functionality of Facebook.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Facebook post",
+    "RESTful API"
+  ],
+  "author": "Damilola Olowookere",
+  "license": "MIT"
+}
