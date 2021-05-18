@@ -1,18 +1,26 @@
-/*
-Registration & login with email & password
-Authentication with JWT
-Send an email to a user after registration
-Password reset
-Publish a post
-Fetch a post
-Delete a post
-Edit a post
-Like & undo post like ??
-Reply to a post
-*/
+import express from "express";
+import authRoutes from "./routes/auth";
+import postsRoutes from "./routes/posts";
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(express.json());
+app.use(express.urlencoded());
+
+/************************************************************
+ ******* S T A R T:  R O U T E  D E F I N I T I O N S *******
+ ************************************************************/
+app.use("/auth", authRoutes);
+app.use("/posts", postsRoutes);
+/************************************************************
+ ********* E N D:  R O U T E  D E F I N I T I O N S *********
+ ************************************************************/
+
+app.listen(PORT, () => console.log(`Server running on port: http://localhost:${PORT}`));
+
 
 /*
--tailwind css
 -hot reload
 */
 
