@@ -3,3 +3,9 @@ export interface User {
 	lastname: string;
 	email: string;
 }
+
+export interface SqlQuery {
+	query: string;
+	bindings?: Array<string>;
+	isValid: boolean;
+}

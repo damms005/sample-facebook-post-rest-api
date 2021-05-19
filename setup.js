@@ -1,6 +1,9 @@
 import {
 	executeQuery
 } from './services/database';
+import {
+	buildQuery
+} from './services/query_builder';
 
 Promise.all([
 		createDatabase(),
@@ -13,11 +16,13 @@ Promise.all([
 	});
 
 function createDatabase() {
-	return executeQuery(`CREATE DATABASE IF NOT EXISTS \`${process.env.DATABASE_DATABASE}\``)
+	let query = buildQuery("CREATE DATABASE IF NOT EXISTS `${process.env.DATABASE_DATABASE}`");
+	return executeQuery(query)
 }
 
 function createTable(tableName: string, tableSchemaDefinition: string) {
-	return executeQuery(`CREATE TABLE IF NOT EXISTS \`${tableName}\` ( ${tableSchemaDefinition} )`)
+	let query = buildQuery(`CREATE TABLE IF NOT EXISTS \`${tableName}\` ( ${tableSchemaDefinition} )`);
+	return executeQuery(query)
 }
 
 function getUsersTableSchemaDefinition() {
@@ -28,6 +33,7 @@ function getUsersTableSchemaDefinition() {
 	password VARCHAR(64) NOT NULL
 	password_reset_token VARCHAR(64) NULL
 	password_reset_token_expires_at DATETIME NULL
+	temporary_password VARCHAR(64) NULL
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP`;
 }
 

@@ -1,4 +1,5 @@
 import mysql from "mysql2";
+import { SqlQuery } from "../types";
 
 function getDatabaseConnection(): Promise<mysql.Connection> {
 	return new Promise((resolve, reject) => {
@@ -20,8 +21,15 @@ function getDatabaseConnection(): Promise<mysql.Connection> {
 	});
 }
 
-export function executeQuery(query: string, bindings: any): Promise<any> {
+export function executeQuery(command: SqlQuery): Promise<any> {
 	return new Promise((resolve, reject) => {
+		if (!command.isValid) {
+			reject("Invalid query");
+			return;
+		}
+
+		const { query, bindings } = command;
+
 		getDatabaseConnection()
 			.then((databaseConnection: mysql.Connection) => {
 				databaseConnection.query(query, bindings, (error, results, fields) => {

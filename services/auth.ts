@@ -25,6 +25,6 @@ export const verifyToken = (request, response, next) => {
 
 		next();
 	} else {
-		response.status(403).send("Request forbidden");
+		response.status(403).send({ message: "Request forbidden" });
 	}
 };

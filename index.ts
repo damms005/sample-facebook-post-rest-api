@@ -6,19 +6,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 /************************************************************
  ******* S T A R T:  R O U T E  D E F I N I T I O N S *******
  ************************************************************/
-app.use("/auth", authRoutes);
-app.use("/posts", postsRoutes);
+app.use("/v1/auth", authRoutes);
+app.use("/v1/posts", postsRoutes);
 /************************************************************
  ********* E N D:  R O U T E  D E F I N I T I O N S *********
  ************************************************************/
 
 app.listen(PORT, () => console.log(`Server running on port: http://localhost:${PORT}`));
-
 
 /*
 -hot reload

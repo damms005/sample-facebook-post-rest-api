@@ -1,11 +1,12 @@
 import express from "express";
-import { register, login, forgotPassword } from '../controllers/auth';
+import { register, login, resetPassword, finalizePasswordResetToken } from "../controllers/auth";
 import { verifyToken } from "../services/auth";
 
 const router = express.Router();
 
-router.post("/create", register);
+router.post("/register", register);
 router.post("/login", verifyToken, login);
-router.post("/forgot-password", forgotPassword);
+router.post("/reset", resetPassword);
+router.get("/reset/:token", finalizePasswordResetToken);
 
 export default router;

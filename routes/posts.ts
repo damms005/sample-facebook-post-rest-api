@@ -9,10 +9,4 @@ router.post("/create", verifyToken, createPost);
 router.delete("/delete", verifyToken, getAllPosts);
 router.patch("/update/:id", verifyToken, getAllPosts);
 
-//post - store
-//get - fetch
-//put - full update
-//patch - partial update
-//delete - zap
-
 export default router;
