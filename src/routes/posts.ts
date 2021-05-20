@@ -1,17 +1,17 @@
 import express from "express";
-import { createPost, getPost, deletePost, updatePost } from "../controllers/posts";
+import { VALIDATION_SOURCE_POST, VALIDATION_RULE_REQUIRED, VALIDATION_SOURCE_PARAMS } from "../constants";
 import { verifyToken } from "../services/auth";
 import { validate } from "../services/validator";
-import { VALIDATION_SOURCE_POST, VALIDATION_RULE_REQUIRED } from "../constants";
+import { createPost, getPost, deletePost, updatePost } from "../controllers/posts";
 
 const router = express.Router();
 
 router.post("/create", [verifyToken, validate({ postBody: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_POST)], createPost);
 
-router.get("/:id", [verifyToken, validate({ email: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_POST)], getPost);
+router.get("/:id", [verifyToken, validate({ id: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_PARAMS)], getPost);
 
-router.delete("/delete/:id", [verifyToken, validate({ email: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_POST)], deletePost);
+router.delete("/:id/delete", [verifyToken, validate({ id: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_PARAMS)], deletePost);
 
-router.patch("/update/:id", [verifyToken, validate({ email: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_POST)], updatePost);
+router.patch("/:id/update", [verifyToken, validate({ id: [VALIDATION_RULE_REQUIRED] }, VALIDATION_SOURCE_PARAMS)], updatePost);
 
 export default router;

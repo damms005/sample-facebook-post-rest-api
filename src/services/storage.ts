@@ -14,7 +14,7 @@ export const getPostImageUploadStorageService = () => {
 	});
 };
 
-export function saveUploadedFile(request, response, nameOfFormField: string, storage: any): Promise<string> {
+export function saveUploadedFile(request, response, nameOfFormField: string, storage: any): Promise<any> {
 	let upload = multer({ storage, fileFilter: imageFilter }).single(nameOfFormField);
 
 	return new Promise((resolve, reject) => {
@@ -25,7 +25,8 @@ export function saveUploadedFile(request, response, nameOfFormField: string, sto
 			}
 
 			if (!request.file) {
-				return reject("Please select an image to upload");
+				//No image was uploaded
+				return resolve(undefined);
 			}
 
 			if (error) {

@@ -13,6 +13,7 @@ export const encrypt = (plainText: string): Promise<string> => {
 			})
 			.catch((error) => {
 				reportError({ error });
+				reject(error);
 			});
 	});
 };

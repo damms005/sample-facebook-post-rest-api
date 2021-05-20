@@ -1,6 +1,6 @@
 import express from "express";
 import { User, SqlQuery } from "../types";
-import { initializeSession } from "../services/auth";
+import { getAuthTokenForUser } from "../services/auth";
 import { insert, findUserByEmail, findUser } from "../repositories/users";
 import { encrypt } from "../services/encryption";
 import { sendEmail, getEmailHtmlTemplate } from "../services/email";
@@ -43,7 +43,7 @@ export const login = (request, response) => {
 					if (!isValid) {
 						return response.status(400).json({ message: AUTH_LOGIN_ERROR_MESSAGE });
 					}
-					initializeSession(user)
+					getAuthTokenForUser(user)
 						.then((token) => {
 							response.json({ sessionToken: token });
 						})
@@ -194,8 +194,6 @@ function changePassword(userId: Number): Promise<any> {
 	let queryString: string = "UPDATE users SET `password` = `temporary_password` WHERE users.id = ? ";
 	let query: SqlQuery = buildQuery(queryString, [userId.toString()]);
 
-	console.log(queryString, userId);
-
 	return executeQuery(query);
 }
 
@@ -214,15 +212,11 @@ function nullifyPasswordResetColumns(userId: Number): Promise<any> {
 
 export function getAuthenticatedUser(request): Promise<User> {
 	return new Promise((resolve, reject) => {
-		let userId = request.jwt.user_id;
+		let userId = request.jwt.user.id;
 
 		findUser("id", userId)
 			.then((queryResult) => {
-				resolve({
-					email: queryResult["email"],
-					lastname: queryResult["lastname"],
-					firstname: queryResult["firstname"],
-				});
+				resolve(request.jwt.user);
 			})
 			.catch((error) => {
 				reject(error);
@@ -233,7 +227,7 @@ export function getAuthenticatedUser(request): Promise<User> {
 function storeUser(password, user, response) {
 	encrypt(password)
 		.then((encryptedPassword) => {
-			Promise.all([insert({ ...user, password: encryptedPassword }), initializeSession(user)])
+			Promise.all([insert({ ...user, password: encryptedPassword }), getAuthTokenForUser(user)])
 				.then((sessionToken) => {
 					sendRegistrationNotificationToUser(user.email);
 					response.json({ message: "Registration successful", sessionToken });

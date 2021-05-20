@@ -65,7 +65,7 @@ function getTokensTableSchemaDefinition() {
 function getPostsTableSchemaDefinition() {
 	return `id INTEGER AUTO_INCREMENT PRIMARY KEY,
 	user_id INTEGER NOT NULL,
-	post_image VARCHAR(250) NOT NULL,
+	post_image VARCHAR(250) NULL,
 	content VARCHAR(255) NOT NULL,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP`;
 }

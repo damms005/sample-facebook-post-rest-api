@@ -17,9 +17,11 @@ app.use(express.urlencoded({ extended: true }));
  ******* S T A R T:  R O U T E  D E F I N I T I O N S *******
  ************************************************************/
 app.use(`/${CURRENT_API_VERSION}/auth`, authRoutes);
+
+//TODO:: combine this post-ish routes together or better refactor them
 app.use(`/${CURRENT_API_VERSION}/posts`, postsRoutes);
-app.use(`/${CURRENT_API_VERSION}/post_likes`, postLikesRoutes);
-app.use(`/${CURRENT_API_VERSION}/post_replies`, postRepliesRoutes);
+app.use(`/${CURRENT_API_VERSION}/post`, postLikesRoutes);
+app.use(`/${CURRENT_API_VERSION}/post`, postRepliesRoutes);
 /************************************************************
  ********* E N D:  R O U T E  D E F I N I T I O N S *********
  ************************************************************/
