@@ -1,5 +1,6 @@
 import sendgridMail from "@sendgrid/mail";
 import { join } from "path";
+import { reportError } from './error_reporting';
 
 require("dotenv").config();
 const edge = require("edge.js").default;
@@ -42,11 +43,8 @@ function processEmail(recipientEmail: string, subject: string, mailBodyHtml: str
 
 	sendgridMail
 		.send(mail)
-		.then((response) => {
-			console.log(response[0].statusCode);
-			console.log(response[0].headers);
-		})
+		.then((response) => {})
 		.catch((error) => {
-			console.error(error);
+			reportError(error);
 		});
 }

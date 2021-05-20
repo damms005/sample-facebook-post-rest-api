@@ -11,13 +11,13 @@ export interface SqlQuery {
 	isValid: boolean;
 }
 
-export type ValidationRule = "email" | "required" | "number";
-
 export type ValidationSource = "post" | "get" | "params";
+
+export type ValidationRule = "email" | "required" | "number";
 export interface ValidationPayload {
 	[inputFieldName: string]: Array<ValidationRule>;
 }
 
-export interface ValidationCollection {
+export interface ValidationRuleInputFieldMap {
 	[rule: string]: Array<string>;
 }

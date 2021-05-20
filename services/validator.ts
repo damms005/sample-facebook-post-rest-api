@@ -1,5 +1,5 @@
-import datalize from "datalize";
-import { ValidationPayload, ValidationRule, ValidationCollection, ValidationSource } from "../types";
+import { body, query, param, validationResult, ValidationChain } from "express-validator";
+import { ValidationPayload, ValidationRule, ValidationRuleInputFieldMap, ValidationSource } from "../types";
 import {
 	VALIDATION_RULE_EMAIL,
 	VALIDATION_RULE_NUMBER,
@@ -9,31 +9,45 @@ import {
 	VALIDATION_SOURCE_PARAMS,
 } from "../constants";
 
-const field = datalize.field;
-
-export const validateData = (dataToValidate: ValidationPayload, source: ValidationSource) => {
-	let allValidationRulesNeeded: ValidationCollection = {};
+export const validate = (dataToValidate: ValidationPayload, source: ValidationSource) => {
+	let rulesInputFieldMap: ValidationRuleInputFieldMap = {};
 
 	Object.keys(dataToValidate).forEach((fieldName) => {
 		let fieldValidationRules = dataToValidate[fieldName];
 
 		fieldValidationRules.forEach((validationRule: ValidationRule) => {
-			if (allValidationRulesNeeded[validationRule] == undefined) {
-				allValidationRulesNeeded[validationRule] = [];
+			if (rulesInputFieldMap[validationRule] == undefined) {
+				rulesInputFieldMap[validationRule] = [];
 			}
 
-			allValidationRulesNeeded[validationRule].push(fieldName);
+			rulesInputFieldMap[validationRule].push({[fieldName]:});
 		});
 	});
 
 	let validationHandlers: Array<any> = [];
 
-	Object.keys(allValidationRulesNeeded).forEach((validationRule) => {
-		let validationHandler = getValidationHandler(allValidationRulesNeeded, validationRule as ValidationRule);
+	Object.keys(rulesInputFieldMap).forEach((validationRule) => {
+		let validationHandler = getValidationHandler(rulesInputFieldMap, validationRule as ValidationRule);
 		validationHandlers = validationHandlers.concat(validationHandler);
 	});
+	let compiledValidationRules = compileValidationRules(source, validationHandlers);
 
-	return compileValidationRules(source, validationHandlers);
+	return compiledValidationRules;
+};
+
+const _validate = (validations) => {
+	return async (request, response, next) => {
+		await Promise.all(validations.map((validation) => validation.run(request)));
+
+		const errors = validationResult(request);
+		if (errors.isEmpty()) {
+			return next();
+		}
+
+		response.status(400).json({
+			errors: errors.array(),
+		});
+	};
 };
 
 function getValidationHandler(allValidationRulesNeeded, validationRule: ValidationRule): Array<any> {
@@ -60,16 +74,75 @@ function getValidationHandler(allValidationRulesNeeded, validationRule: Validati
 	return validationHandlers;
 }
 
-function compileValidationRules(source: ValidationSource, validationHandlers: Array<any>) {
+function compileValidationRules(source: ValidationSource, validationHandlers: Array<any>): ValidationChain | undefined {
 	if (source == VALIDATION_SOURCE_POST) {
-		return datalize(validationHandlers);
+		return body(validationHandlers);
 	}
 
 	if (source == VALIDATION_SOURCE_GET) {
-		return datalize.query(validationHandlers);
+		return query(validationHandlers);
 	}
 
 	if (source == VALIDATION_SOURCE_PARAMS) {
-		return datalize.params(validationHandlers);
+		return param(validationHandlers);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const __validate = (dataToValidate: ValidationPayload, source: ValidationSource) => {
+	let compiledValidationRules: Array<ValidationChain> = {} as any;
+
+	Object.keys(dataToValidate).forEach((fieldName) => {
+		let fieldValidationRules = dataToValidate[fieldName];
+
+		fieldValidationRules.forEach((validationRule: ValidationRule) => {
+			if (compiledValidationRules[validationRule] == undefined) {
+				compiledValidationRules[validationRule] = [];
+			}
+
+			compiledValidationRules[validationRule].push({[fieldName]:});
+		});
+	});
+
+	let validationHandlers: Array<any> = [];
+
+	Object.keys(compiledValidationRules).forEach((validationRule) => {
+		let validationHandler = getValidationHandler(compiledValidationRules, validationRule as ValidationRule);
+		validationHandlers = validationHandlers.concat(validationHandler);
+	});
+
+	return compiledValidationRules;
+}
+
+function startValidationChain(source: ValidationSource,inputFieldName:string):ValidationChain|undefined {
+	if (source == VALIDATION_SOURCE_POST) {
+		return   body(inputFieldName).isEmail();
+	}
+
+	if (source == VALIDATION_SOURCE_GET) {
+		return query(inputFieldName).trim();
+	}
+
+	if (source == VALIDATION_SOURCE_PARAMS) {
+		return param(inputFieldName).trim();
 	}
 }

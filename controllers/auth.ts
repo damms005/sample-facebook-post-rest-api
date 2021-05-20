@@ -8,12 +8,12 @@ import crypto from "crypto";
 import { executeQuery } from "../services/database";
 import { getUrlFromPath } from "../services/routing";
 import { buildQuery } from "../services/query_builder";
-
-const TOKEN_PASSWORD_SEPARATOR = `[:password:]`;
+import { reportError } from "../services/error_reporting";
 
 export const register = (request, response) => {
 	const user: User = getUser(request);
 	const { password } = request.body;
+	console.log("body: ", request.body);
 
 	encrypt(password)
 		.then((encryptedPassword) => {
@@ -25,7 +25,7 @@ export const register = (request, response) => {
 				.catch((error) => response.json({ message: "User registration failed", ...error }));
 		})
 		.catch(() => {
-			console.log("Data encryption failed");
+			reportError("Data encryption failed");
 		});
 };
 
