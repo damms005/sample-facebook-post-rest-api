@@ -13,16 +13,16 @@ const TOKEN_PASSWORD_SEPARATOR = `[:password:]`;
 
 export const register = (request, response) => {
 	const user: User = getUser(request);
-	const { password } = request.body();
+	const { password } = request.body;
 
 	encrypt(password)
 		.then((encryptedPassword) => {
 			Promise.all([insert({ ...user, password: encryptedPassword }), initializeSession(user)])
 				.then((sessionToken) => {
 					sendRegistrationNotificationToUser(user.email);
-					response.send({ message: "Registration successful", sessionToken });
+					response.json({ message: "Registration successful", sessionToken });
 				})
-				.catch((error) => response.send({ message: "User registration failed", ...error }));
+				.catch((error) => response.json({ message: "User registration failed", ...error }));
 		})
 		.catch(() => {
 			console.log("Data encryption failed");
@@ -30,7 +30,7 @@ export const register = (request, response) => {
 };
 
 export const login = (request, response) => {
-	const { email, password } = request.body();
+	const { email, password } = request.body;
 
 	findUserByEmail(email)
 		.then((user: any) => {
@@ -39,34 +39,34 @@ export const login = (request, response) => {
 				.then(() => {
 					initializeSession(user)
 						.then((token) => {
-							response.send({ sessionToken: token });
+							response.json({ sessionToken: token });
 						})
-						.catch((error) => response.send({ message: "User registration failed", ...error }));
+						.catch((error) => response.json({ message: "User registration failed", ...error }));
 				})
 				.catch((error) => {
 					response.status(400).json({ error: "Invalid login credentials. Please try again" });
 				});
 		})
 		.catch((error) => {
-			response.status(401).send({ error });
+			response.status(401).json({ error });
 		});
 };
 
 export const resetPassword = (request, response) => {
-	const { email, newPassword } = request.body();
+	const { email, newPassword } = request.body;
 
 	Promise.all([getToken(), encrypt(newPassword)])
 		.then(([token, encryptedNewPassword]) => {
 			initiatePasswordReset(request, token, email, encryptedNewPassword)
 				.then(() => {
-					response.send({ message: "A link to reset your password has been sent to your email. Thank you" });
+					response.json({ message: "A link to reset your password has been sent to your email. Thank you" });
 				})
 				.catch((error) => {
-					response.status(403).send({ error });
+					response.status(403).json({ error });
 				});
 		})
 		.catch((error) => {
-			response.status(500).send({ error });
+			response.status(500).json({ error });
 		});
 };
 
@@ -78,20 +78,19 @@ export const finalizePasswordResetToken = (request, response) => {
 			let userId = queryResult["id"];
 			let tokenExpiry = queryResult["password_reset_token_expires_at"];
 			if (isExpiredToken(tokenExpiry)) {
-				response.status(503).send({ message: "Token expiry error" });
-				return;
+				return response.status(503).json({ message: "Token expiry error" });
 			}
 
 			runPasswordUpdateDatabaseChanges(userId)
 				.then(() => {
-					response.send({ message: "Password update completed" });
+					response.json({ message: "Password update completed" });
 				})
 				.catch((error) => {
-					response.status(403).send({ message: "An error occurred", ...error });
+					response.status(403).json({ message: "An error occurred", ...error });
 				});
 		})
 		.catch((error) => {
-			response.status(401).send({ message: "Error: invalid token", ...error });
+			response.status(401).json({ message: "Error: invalid token", ...error });
 		});
 };
 
@@ -103,8 +102,7 @@ function getToken(): Promise<string> {
 	return new Promise((resolve, reject) => {
 		crypto.randomBytes(20, function (error, buffer) {
 			if (error) {
-				reject(error);
-				return;
+				return reject(error);
 			}
 
 			var token = buffer.toString("hex");
@@ -147,7 +145,7 @@ function sendRegistrationNotificationToUser(recipientEmail: string) {
 }
 
 function getUser(request: any): User {
-	const { firstname, lastname, email } = request.body();
+	const { firstname, lastname, email } = request.body;
 	return { firstname, lastname, email };
 }
 
@@ -204,4 +202,22 @@ function nullifyPasswordResetColumns(userId: Number): Promise<void> {
 	);
 
 	return executeQuery(query);
+}
+
+export function getAuthenticatedUser(request): Promise<User> {
+	return new Promise((resolve, reject) => {
+		let userId = request.jwt.user_id;
+
+		findUser("id", userId)
+			.then((queryResult) => {
+				resolve({
+					email: queryResult["email"],
+					lastname: queryResult["lastname"],
+					firstname: queryResult["firstname"],
+				});
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
 }

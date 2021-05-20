@@ -11,7 +11,7 @@ export const encrypt = (plainText: string): Promise<string> => {
 				});
 			});
 
-			return;
+			return reject("System error");
 		}
 
 		reject("Could not generate hashing salt");

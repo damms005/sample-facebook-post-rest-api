@@ -7,8 +7,7 @@ export const initializeSession = (user: User): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		jwt.sign({ user: user }, tokenSecret, (error, token) => {
 			if (error) {
-				reject(error);
-				return;
+				return reject(error);
 			}
 
 			resolve(token);
@@ -17,14 +16,20 @@ export const initializeSession = (user: User): Promise<string> => {
 };
 
 export const verifyToken = (request, response, next) => {
-	const bearerHeader = request.headers["authorization"];
+	if (request.headers["authorization"]) {
+		return response.status(401).json({ message: "Authorization header not found" });
+	}
 
-	if (typeof bearerHeader !== "undefined") {
-		const bearerToken = bearerHeader.split(" ")[1];
-		request.token = bearerToken;
+	try {
+		let authorization = request.headers["authorization"].split(" ");
+		if (authorization[0] !== "Bearer") {
+			return response.status(401).json({ message: "Authorization header not correctly set" });
+		}
 
-		next();
-	} else {
-		response.status(403).send({ message: "Request forbidden" });
+		request.jwt = jwt.verify(authorization[1], process.env.JWT_SECRET);
+
+		return next();
+	} catch (error) {
+		return response.status(403).json({ message: "An error occurred", ...error });
 	}
 };

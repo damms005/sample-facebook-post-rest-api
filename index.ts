@@ -1,6 +1,8 @@
 import express from "express";
 import authRoutes from "./routes/auth";
 import postsRoutes from "./routes/posts";
+import postLikesRoutes from "./routes/post_likes";
+import postRepliesRoutes from "./routes/post_replies";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,6 +15,8 @@ app.use(express.urlencoded({ extended: true }));
  ************************************************************/
 app.use("/v1/auth", authRoutes);
 app.use("/v1/posts", postsRoutes);
+app.use("/v1/post_likes", postLikesRoutes);
+app.use("/v1/post_replies", postRepliesRoutes);
 /************************************************************
  ********* E N D:  R O U T E  D E F I N I T I O N S *********
  ************************************************************/

@@ -12,8 +12,7 @@ function getDatabaseConnection(): Promise<mysql.Connection> {
 
 		databaseConnection.connect((error) => {
 			if (error) {
-				reject(error);
-				return;
+				return reject(error);
 			}
 
 			resolve(databaseConnection);
@@ -24,8 +23,7 @@ function getDatabaseConnection(): Promise<mysql.Connection> {
 export function executeQuery(command: SqlQuery): Promise<any> {
 	return new Promise((resolve, reject) => {
 		if (!command.isValid) {
-			reject("Invalid query");
-			return;
+			return reject("Invalid query");
 		}
 
 		const { query, bindings } = command;
@@ -34,8 +32,7 @@ export function executeQuery(command: SqlQuery): Promise<any> {
 			.then((databaseConnection: mysql.Connection) => {
 				databaseConnection.query(query, bindings, (error, results, fields) => {
 					if (error) {
-						reject(error);
-						return;
+						return reject(error);
 					}
 
 					resolve({ results, fields });
