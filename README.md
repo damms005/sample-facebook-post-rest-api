@@ -1,6 +1,8 @@
 # Sample Facebook Post API
 
-![Project Art](https://banners.beyondco.de/Sample%20Facebook%20Post%20API.png?theme=light&packageManager=&packageName=&pattern=architect&style=style_1&description=This+is+why+it%27s+awesome&md=1&showWatermark=1&fontSize=100px&images=speakerphone) This project aims to be a powerful RESTful implementation of the posts functionality of Facebook, with the major difference that this one is going to the moon 🚀🚀🚀.
+![Project Art](https://banners.beyondco.de/Sample%20Facebook%20Post%20API.png?theme=light&packageManager=&packageName=A+RESTful+API+that+minimally+mimics+Facebook%27s+post+functionality.&pattern=architect&style=style_1&description=&md=1&showWatermark=1&fontSize=100px&images=speakerphone) This project aims to be a powerful RESTful implementation of the posts functionality of Facebook, with the major difference that this one is going to the moon 🚀🚀🚀.
+
+It is an ExpressJS-powered Node application backend (server). Hence, you will need a client tool to interact with it.
 
 ## Setup
 
@@ -22,6 +24,9 @@ Please ensure to have the following set up and running:
 6. Run `npm run setup-database`. This script creates the necessary database schema
 7. Run `npm run dev` to start the app
 8. Open Postman to interact with the app
+
+## API Documentation
+Postman documentation version of the API is [available here](https://documenter.getpostman.com/view/4254885/TzRa8Q7y)
 
 ## Test
 
