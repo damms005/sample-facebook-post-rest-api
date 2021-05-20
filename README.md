@@ -1,14 +1,28 @@
+# Sample Facebook Post API
+
+![Project Art](https://banners.beyondco.de/Sample%20Facebook%20Post%20API.png?theme=light&packageManager=&packageName=&pattern=architect&style=style_1&description=This+is+why+it%27s+awesome&md=1&showWatermark=1&fontSize=100px&images=speakerphone) This project aims to be a powerful RESTful implementation of the posts functionality of Facebook, with the major difference that this one is going to the moon 🚀🚀🚀.
+
+## Setup
+
 Please ensure to have the following set up and running:
 
-- Node.js
+- Node.js >= v15.14.0
+- MySQL >= v8.0.25
 - Terminal or Command Line
-- Text Editor
-- [Postman](https://blah-blah.com)
-- [SendGrid](https://blah-blah.com)
+- [Postman](https://www.postman.com/downloads/) (to test our API with)
+- [SendGrid](https://sendgrid.com) (for quick, scalable and reliable means of sending emails)
 
-Steps:
+## Usage
 
-1. Follow this guide to get your SendGrid API keys https://sendgrid.com/docs/for-developers/sending-email/quickstart-nodejs/#prerequisites
-2. Create database in MySQL and set its value in `.env`
-3. Create a database in MySQL and update the `DATABASE_DATABASE` field in `.env` with the database name
-4. `cd` to the clone folder and run `npm run setup-database`. This script creates the necessary database schema;
+1. Create an account with SendGrid, then follow [this guide](https://sendgrid.com/docs/ui/account-and-settings/api-keys/#creating-an-api-key) to get your SendGrid API keys
+2. Create a database in MySQL
+3. Clone this repo and `cd` into the cloned folder
+4. Run `cp .env.example .env` from the terminal
+5. UPDATE all `DATABASE_*` field in `.env` with the appropriate MySQL database details
+6. Run `npm run setup-database`. This script creates the necessary database schema
+7. Run `npm run dev` to start the app
+8. Open Postman to interact with the app
+
+## Test
+
+`npm run test`
