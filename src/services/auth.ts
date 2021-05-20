@@ -16,10 +16,11 @@ export const initializeSession = (user: User): Promise<string> => {
 };
 
 export const verifyToken = (request, response, next) => {
-	if (request.headers["authorization"]) {
+	if (request.headers["authorization"] == undefined) {
 		return response.status(401).json({ message: "Authorization header not found" });
 	}
 
+	console.log(request.headers["authorization"]);
 	try {
 		let authorization = request.headers["authorization"].split(" ");
 		if (authorization[0] !== "Bearer") {
@@ -30,6 +31,6 @@ export const verifyToken = (request, response, next) => {
 
 		return next();
 	} catch (error) {
-		return response.status(403).json({ message: "An error occurred", ...error });
+		return response.status(401).json({ message: "Could not process authentication header", error });
 	}
 };

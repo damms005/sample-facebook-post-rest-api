@@ -6,13 +6,13 @@ import { executeQuery } from "../services/database";
 import { getUrlFromPath } from "../services/routing";
 
 export const createPost = (request, response) => {
-	const { post_body } = request.body;
+	const { postBody } = request.body;
 
 	saveUploadedFile(request, response, "post_image", getPostImageUploadStorageService())
 		.then((savedFilePath) => {
 			getAuthenticatedUser(request)
 				.then((user: User) => {
-					let bindings = [(user.id as Number).toString(), savedFilePath, post_body];
+					let bindings = [(user.id as Number).toString(), savedFilePath, postBody];
 					let query: SqlQuery = buildQuery("INSERT INTO posts (user_id, post_image, content) VALUES (?,?,?)", bindings);
 
 					executeQuery(query)

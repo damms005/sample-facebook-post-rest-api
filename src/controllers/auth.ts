@@ -39,12 +39,15 @@ export const login = (request, response) => {
 		.then((user: User) => {
 			bcrypt
 				.compare(password, user.password)
-				.then(() => {
+				.then((isValid) => {
+					if (!isValid) {
+						return response.status(400).json({ message: AUTH_LOGIN_ERROR_MESSAGE });
+					}
 					initializeSession(user)
 						.then((token) => {
 							response.json({ sessionToken: token });
 						})
-						.catch((error) => response.json({ message: "User registration failed", ...error }));
+						.catch((error) => response.json({ message: "User registration failed", error }));
 				})
 				.catch((error) => {
 					response.status(400).json({ message: AUTH_LOGIN_ERROR_MESSAGE, error });
@@ -89,11 +92,11 @@ export const finalizePasswordResetToken = (request, response) => {
 					response.json({ message: "Password update completed" });
 				})
 				.catch((error) => {
-					response.status(403).json({ message: "An error occurred", ...error });
+					response.status(403).json({ message: "An error occurred", error });
 				});
 		})
 		.catch((error) => {
-			response.status(401).json({ message: "Error: invalid token", ...error });
+			response.status(401).json({ message: "Error: invalid token", error });
 		});
 };
 
@@ -188,7 +191,10 @@ function runPasswordUpdateDatabaseChanges(userId: Number): Promise<any[]> {
 }
 
 function changePassword(userId: Number): Promise<any> {
-	let query: SqlQuery = buildQuery("UPDATE users SET password = temporary_password WHERE user.id = ? ", [userId.toString()]);
+	let queryString: string = "UPDATE users SET `password` = `temporary_password` WHERE users.id = ? ";
+	let query: SqlQuery = buildQuery(queryString, [userId.toString()]);
+
+	console.log(queryString, userId);
 
 	return executeQuery(query);
 }
@@ -198,8 +204,8 @@ function nullifyPasswordResetColumns(userId: Number): Promise<any> {
 		"UPDATE users SET \
 		password_reset_token = NULL, \
 		password_reset_token_expires_at = NULL, \
-		temporary_password = NULL, \
-		WHERE user.id = ? ",
+		temporary_password = NULL \
+		WHERE users.id = ? ",
 		[userId.toString()]
 	);
 
@@ -230,9 +236,9 @@ function storeUser(password, user, response) {
 			Promise.all([insert({ ...user, password: encryptedPassword }), initializeSession(user)])
 				.then((sessionToken) => {
 					sendRegistrationNotificationToUser(user.email);
-					response.json({ message: "Registration successful" });
+					response.json({ message: "Registration successful", sessionToken });
 				})
-				.catch((error) => response.json({ message: "User registration failed", ...error }));
+				.catch((error) => response.json({ message: "User registration failed", error }));
 		})
 		.catch((error) => {
 			response.status(400).json({ error });

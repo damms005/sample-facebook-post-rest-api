@@ -7,6 +7,7 @@ console.info("Database setup started");
 
 const tasks = Promise.all([
 	//TODO:: validate entries for content length before inserting/updating the database, to prevent data truncation
+	//TODO:: Add updated_at column to tables and make it auto on update current_timestamp
 
 	createTable("users", getUsersTableSchemaDefinition()),
 	createTable("tokens", getTokensTableSchemaDefinition()),
