@@ -22,8 +22,8 @@ Please ensure to have the following set up and running:
 4. Run `cp .env.example .env` from the terminal
 5. UPDATE all `DATABASE_*` field in `.env` with the appropriate MySQL database details
 6. Run `npm run setup-database`. This script creates the necessary database schema
-7. Run `npm run dev` to start the app
-8. Open Postman to interact with the app
+7. Run `npm run dev` on the terminal to start the app. The app URL will be displayed on the terminal (e.g. `http://localhost:5000`)
+8. Open Postman to interact with the app using the URL gotten in the step above.
 
 ## API Documentation
 Postman documentation version of the API is [available here](https://documenter.getpostman.com/view/4254885/TzRa8Q7y)
