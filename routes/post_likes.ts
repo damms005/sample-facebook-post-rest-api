@@ -5,6 +5,6 @@ import { verifyToken } from "../services/auth";
 const router = express.Router();
 
 router.post("/create", verifyToken, likePost);
-router.delete("/delete/:id", verifyToken, unlikePost);
+router.delete("/delete/:postId", verifyToken, unlikePost);
 
 export default router;

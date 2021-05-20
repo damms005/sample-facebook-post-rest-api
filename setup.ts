@@ -15,12 +15,12 @@ Promise.all([
 });
 
 function createDatabase() {
-	let query = buildQuery("CREATE DATABASE IF NOT EXISTS `${process.env.DATABASE_DATABASE}`", null);
+	let query = buildQuery("CREATE DATABASE IF NOT EXISTS `${process.env.DATABASE_DATABASE}`");
 	return executeQuery(query);
 }
 
 function createTable(tableName: string, tableSchemaDefinition: string) {
-	let query = buildQuery(`CREATE TABLE IF NOT EXISTS \`${tableName}\` ( ${tableSchemaDefinition} )`, null);
+	let query = buildQuery(`CREATE TABLE IF NOT EXISTS \`${tableName}\` ( ${tableSchemaDefinition} )`);
 	return executeQuery(query);
 }
 

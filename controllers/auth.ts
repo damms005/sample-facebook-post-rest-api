@@ -115,10 +115,10 @@ function getToken(): Promise<string> {
 function initiatePasswordReset(request, token: string, email: string, encryptedNewPassword: string): Promise<void> {
 	return new Promise((resolve, reject) => {
 		findUserByEmail(email)
-			.then((user: any) => {
+			.then((user: User) => {
 				let tokenExpiry = Date.now() + 3600000; // 1 hour
 				let query = getPasswordUpdateQuery();
-				let bindings = [token, tokenExpiry, encryptedNewPassword, user.id];
+				let bindings = [token, tokenExpiry.toString(), encryptedNewPassword, (user.id as Number).toString()];
 				let sqlQuery: SqlQuery = buildQuery(query, bindings);
 
 				executeQuery(sqlQuery)

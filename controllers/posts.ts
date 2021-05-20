@@ -3,6 +3,7 @@ import { buildQuery } from "../services/query_builder";
 import { saveUploadedFile, getPostImageUploadStorageService } from "../services/storage";
 import { getAuthenticatedUser } from "./auth";
 import { executeQuery } from "../services/database";
+import { getUrlFromPath } from "../services/routing";
 
 export const createPost = (request, response) => {
 	const { post_body } = request.body;
@@ -11,7 +12,7 @@ export const createPost = (request, response) => {
 		.then((savedFilePath) => {
 			getAuthenticatedUser(request)
 				.then((user: User) => {
-					let bindings = [user.id.toString(), savedFilePath, post_body];
+					let bindings = [(user.id as Number).toString(), savedFilePath, post_body];
 					let query: SqlQuery = buildQuery("INSERT INTO posts (user_id, post_image, content) VALUES (?,?,?)", bindings);
 
 					executeQuery(query)
@@ -35,11 +36,17 @@ export const createPost = (request, response) => {
 
 export const getPost = (request, response) => {
 	const postId = request.params.id;
-	const queryString =
-		"SELECT posts.*, SUM(post_likes.*) as number_of_likes \
-		FROM posts \
-		LEFT JOIN posts_likes ON posts.id = post_likes.post_id \
-		WHERE posts.id = ?";
+
+	let imageUrlPrefix: string = getUrlFromPath(request, "/uploads");
+
+	const queryString = `SELECT
+		posts.content,
+		SUM(post_likes.*) as number_of_likes,
+		WS_CONACT("${imageUrlPrefix}", posts.post_image) as cover_image_url,
+		GROUP_CONCAT(post_replies.reply_text SEPARATOR '; '),
+		FROM posts
+		LEFT JOIN posts_likes ON posts.id = post_likes.post_id
+		WHERE posts.id = ?`;
 
 	let query = buildQuery(queryString, [postId]);
 
@@ -72,10 +79,10 @@ export const deletePost = (request, response) => {
 export const updatePost = (request, response) => {
 	getAuthenticatedUser(request)
 		.then((user: User) => {
-			let userId = user.id.toString();
+			let userId = (user.id as Number).toString();
 			let postSecurityCondition = "user_id = ?";
 			let setQueryString: SqlQuery = getSetQueryStringFromFormInput(request.body);
-			let bindings = setQueryString.bindings.concat(userId, userId);
+			let bindings = setQueryString.bindings?.concat([userId, userId]);
 			let query = buildQuery(`UPDATE posts SET ${setQueryString.query} WHERE id = ? AND ${postSecurityCondition}`, bindings);
 
 			executeQuery(query)
@@ -94,9 +101,9 @@ export const updatePost = (request, response) => {
 };
 
 function getSetQueryStringFromFormInput(formInputs: any): SqlQuery {
-	let updates = [];
+	let updates: any = [];
 
-	let sqlQuery = {
+	let sqlQuery: any = {
 		query: "",
 		bindings: [],
 		isValid: true,

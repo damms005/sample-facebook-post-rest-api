@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../types";
 
 export const initializeSession = (user: User): Promise<string> => {
-	let tokenSecret = process.env.JWT_SECRET;
+	let tokenSecret: any = process.env.JWT_SECRET;
 
 	return new Promise((resolve, reject) => {
 		jwt.sign({ user: user }, tokenSecret, (error, token) => {
@@ -26,7 +26,7 @@ export const verifyToken = (request, response, next) => {
 			return response.status(401).json({ message: "Authorization header not correctly set" });
 		}
 
-		request.jwt = jwt.verify(authorization[1], process.env.JWT_SECRET);
+		request.jwt = jwt.verify(authorization[1], process.env.JWT_SECRET as any);
 
 		return next();
 	} catch (error) {

@@ -31,9 +31,9 @@ export function getEmailHtmlTemplate(viewName: string, parameters: any): Promise
 }
 
 function processEmail(recipientEmail: string, subject: string, mailBodyHtml: string) {
-	sendgridMail.setApiKey(process.env.SENDGRID_API_KEY);
+	sendgridMail.setApiKey(process.env.SENDGRID_API_KEY as any);
 
-	const mail = {
+	const mail: any = {
 		from: process.env.TWILIO_VERIFIES_SENDER_EMAIL,
 		to: recipientEmail,
 		subject,
