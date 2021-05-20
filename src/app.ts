@@ -1,4 +1,5 @@
 import express from "express";
+import { CURRENT_API_VERSION } from "./constants";
 import authRoutes from "./routes/auth";
 import postsRoutes from "./routes/posts";
 import postLikesRoutes from "./routes/post_likes";
@@ -15,10 +16,10 @@ app.use(express.urlencoded({ extended: true }));
 /************************************************************
  ******* S T A R T:  R O U T E  D E F I N I T I O N S *******
  ************************************************************/
-app.use("/v1/auth", authRoutes);
-app.use("/v1/posts", postsRoutes);
-app.use("/v1/post_likes", postLikesRoutes);
-app.use("/v1/post_replies", postRepliesRoutes);
+app.use(`/${CURRENT_API_VERSION}/auth`, authRoutes);
+app.use(`/${CURRENT_API_VERSION}/posts`, postsRoutes);
+app.use(`/${CURRENT_API_VERSION}/post_likes`, postLikesRoutes);
+app.use(`/${CURRENT_API_VERSION}/post_replies`, postRepliesRoutes);
 /************************************************************
  ********* E N D:  R O U T E  D E F I N I T I O N S *********
  ************************************************************/

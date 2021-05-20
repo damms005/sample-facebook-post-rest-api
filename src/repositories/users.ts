@@ -1,5 +1,5 @@
 import { executeQuery, isEmptySelectQueryResponse } from "../services/database";
-import { SqlQuery, User } from "../types";
+import { SqlQuery, User } from "../../types";
 import { buildQuery } from "../services/query_builder";
 
 export const insert = (user: any) => {
@@ -13,7 +13,7 @@ export const findUserByEmail = (email: string): Promise<User> => {
 
 export const findUser = (matchedColumn: string, matchedValue: string): Promise<User> => {
 	return new Promise((resolve, reject) => {
-		let query: SqlQuery = buildQuery("SELECT id,email,password FROM users WHERE ?? = ?", [matchedColumn, matchedValue]);
+		let query: SqlQuery = buildQuery("SELECT id,email,password,firstname,lastname FROM users WHERE ?? = ?", [matchedColumn, matchedValue]);
 
 		executeQuery(query)
 			.then((databaseResult: any) => {

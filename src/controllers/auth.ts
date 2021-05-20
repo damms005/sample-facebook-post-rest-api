@@ -1,5 +1,5 @@
 import express from "express";
-import { User, SqlQuery } from "../types";
+import { User, SqlQuery } from "../../types";
 import { initializeSession } from "../services/auth";
 import { insert, findUserByEmail, findUser } from "../repositories/users";
 import { encrypt } from "../services/encryption";
@@ -10,6 +10,7 @@ import { executeQuery } from "../services/database";
 import { getUrlFromPath } from "../services/routing";
 import { buildQuery } from "../services/query_builder";
 import { SSL_OP_ALL } from "constants";
+import { convertDateToMysqlDateTime } from "../services/date";
 
 const AUTH_LOGIN_ERROR_MESSAGE = "Invalid login credentials. Please try again";
 
@@ -118,9 +119,9 @@ function initiatePasswordReset(request, token: string, email: string, encryptedN
 	return new Promise((resolve, reject) => {
 		findUserByEmail(email)
 			.then((user: User) => {
-				let tokenExpiry = Date.now() + 3600000; // 1 hour
+				let tokenExpiry = convertDateToMysqlDateTime(new Date(Date.now() + 3600000)); // 1 hour
 				let query = getPasswordUpdateQuery();
-				let bindings = [token, tokenExpiry.toString(), encryptedNewPassword, (user.id as Number).toString()];
+				let bindings = [token, tokenExpiry, encryptedNewPassword, (user.id as Number).toString()];
 				let sqlQuery: SqlQuery = buildQuery(query, bindings);
 
 				executeQuery(sqlQuery)
@@ -129,7 +130,6 @@ function initiatePasswordReset(request, token: string, email: string, encryptedN
 						resolve();
 					})
 					.catch((error) => {
-						console.log("go", user);
 						reject(error);
 					});
 			})
@@ -154,7 +154,7 @@ function getUserForRegistration(request: express.Request): User {
 function sendPasswordResetLinkToUser(request, user: User, token: string): Promise<void> {
 	const parameters = {
 		link: getUrlFromPath(request, `/reset/${token}`),
-		user: user.firstname,
+		...user,
 	};
 
 	return new Promise((resolve, reject) => {

@@ -3,7 +3,7 @@ import { join } from "path";
 import { reportError } from './error_reporting';
 
 const edge = require("edge.js").default;
-edge.mount(join(__dirname, "views"));
+edge.mount(join(__dirname, "../views"));
 
 const MAIL_PROCESSING_DELAY_IN_MILLISECONDS = 1000;
 
