@@ -10,132 +10,42 @@ import {
 } from "../constants";
 
 export const validate = (dataToValidate: ValidationPayload, source: ValidationSource) => {
-	let rulesInputFieldMap: ValidationRuleInputFieldMap = {};
+	let compiledValidationRules: Array<ValidationChain> = [] as any;
 
-	Object.keys(dataToValidate).forEach((fieldName) => {
-		let fieldValidationRules = dataToValidate[fieldName];
+	Object.keys(dataToValidate).forEach((inputFieldName) => {
+		let validationRulesForInputField = dataToValidate[inputFieldName];
 
-		fieldValidationRules.forEach((validationRule: ValidationRule) => {
-			if (rulesInputFieldMap[validationRule] == undefined) {
-				rulesInputFieldMap[validationRule] = [];
-			}
+		let validationChain: ValidationChain = getValidatorChain(source, inputFieldName, validationRulesForInputField);
 
-			rulesInputFieldMap[validationRule].push({[fieldName]:});
-		});
+		compiledValidationRules.push(validationChain);
 	});
-
-	let validationHandlers: Array<any> = [];
-
-	Object.keys(rulesInputFieldMap).forEach((validationRule) => {
-		let validationHandler = getValidationHandler(rulesInputFieldMap, validationRule as ValidationRule);
-		validationHandlers = validationHandlers.concat(validationHandler);
-	});
-	let compiledValidationRules = compileValidationRules(source, validationHandlers);
 
 	return compiledValidationRules;
 };
 
-const _validate = (validations) => {
-	return async (request, response, next) => {
-		await Promise.all(validations.map((validation) => validation.run(request)));
+function getValidatorChain(source, inputFieldName, validationRulesForInputField): ValidationChain {
+	let validationChain: ValidationChain = bootValidationChain(source, inputFieldName) as ValidationChain;
 
-		const errors = validationResult(request);
-		if (errors.isEmpty()) {
-			return next();
-		}
-
-		response.status(400).json({
-			errors: errors.array(),
-		});
-	};
-};
-
-function getValidationHandler(allValidationRulesNeeded, validationRule: ValidationRule): Array<any> {
-	let validationHandlers: Array<any> = [];
-
-	let inputFields = allValidationRulesNeeded[validationRule];
-	inputFields.forEach((inputField) => {
+	validationRulesForInputField.forEach((validationRule: ValidationRule) => {
 		if (validationRule == VALIDATION_RULE_REQUIRED) {
-			validationHandlers.push(field(inputField, inputField).trim().required());
-			return;
+			validationChain = validationChain.exists().notEmpty();
 		}
 
 		if (validationRule == VALIDATION_RULE_EMAIL) {
-			validationHandlers.push(field(inputField, inputField).trim().email());
-			return;
+			validationChain = validationChain.isEmail();
 		}
 
 		if (validationRule == VALIDATION_RULE_NUMBER) {
-			validationHandlers.push(field(inputField, inputField).trim().number());
-			return;
+			validationChain = validationChain.isNumeric();
 		}
 	});
 
-	return validationHandlers;
+	return validationChain;
 }
 
-function compileValidationRules(source: ValidationSource, validationHandlers: Array<any>): ValidationChain | undefined {
+function bootValidationChain(source: ValidationSource, inputFieldName: string): ValidationChain | undefined {
 	if (source == VALIDATION_SOURCE_POST) {
-		return body(validationHandlers);
-	}
-
-	if (source == VALIDATION_SOURCE_GET) {
-		return query(validationHandlers);
-	}
-
-	if (source == VALIDATION_SOURCE_PARAMS) {
-		return param(validationHandlers);
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const __validate = (dataToValidate: ValidationPayload, source: ValidationSource) => {
-	let compiledValidationRules: Array<ValidationChain> = {} as any;
-
-	Object.keys(dataToValidate).forEach((fieldName) => {
-		let fieldValidationRules = dataToValidate[fieldName];
-
-		fieldValidationRules.forEach((validationRule: ValidationRule) => {
-			if (compiledValidationRules[validationRule] == undefined) {
-				compiledValidationRules[validationRule] = [];
-			}
-
-			compiledValidationRules[validationRule].push({[fieldName]:});
-		});
-	});
-
-	let validationHandlers: Array<any> = [];
-
-	Object.keys(compiledValidationRules).forEach((validationRule) => {
-		let validationHandler = getValidationHandler(compiledValidationRules, validationRule as ValidationRule);
-		validationHandlers = validationHandlers.concat(validationHandler);
-	});
-
-	return compiledValidationRules;
-}
-
-function startValidationChain(source: ValidationSource,inputFieldName:string):ValidationChain|undefined {
-	if (source == VALIDATION_SOURCE_POST) {
-		return   body(inputFieldName).isEmail();
+		return body(inputFieldName).trim();
 	}
 
 	if (source == VALIDATION_SOURCE_GET) {
