@@ -9,6 +9,16 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+import datalize from "datalize";
+
+app.use(function (error, request, response, next) {
+	if (error instanceof datalize.Error) {
+		response.status(400).send({
+			message: "An error occurred",
+			...error.toJSON(),
+		});
+	}
+});
 
 /************************************************************
  ******* S T A R T:  R O U T E  D E F I N I T I O N S *******
