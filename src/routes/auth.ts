@@ -1,7 +1,7 @@
 import express from "express";
+import { VALIDATION_RULE_REQUIRED, VALIDATION_RULE_EMAIL, VALIDATION_SOURCE_POST } from "../constants";
 import { register, login, resetPassword, finalizePasswordResetToken } from "../controllers/auth";
 import { validate } from "../services/validator";
-import { VALIDATION_RULE_REQUIRED, VALIDATION_RULE_EMAIL, VALIDATION_SOURCE_POST } from "../constants";
 
 const router = express.Router();
 

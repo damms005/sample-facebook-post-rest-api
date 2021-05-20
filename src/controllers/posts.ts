@@ -1,4 +1,4 @@
-import { SqlQuery, User } from "../../types";
+import { SqlQuery, User } from "../types";
 import { buildQuery } from "../services/query_builder";
 import { saveUploadedFile, getPostImageUploadStorageService } from "../services/storage";
 import { getAuthenticatedUser } from "./auth";

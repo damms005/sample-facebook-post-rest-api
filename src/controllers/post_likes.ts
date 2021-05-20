@@ -1,4 +1,4 @@
-import { SqlQuery, User } from "../../types";
+import { SqlQuery, User } from "../types";
 import { buildQuery } from "../services/query_builder";
 import { getAuthenticatedUser } from "./auth";
 import { executeQuery } from "../services/database";

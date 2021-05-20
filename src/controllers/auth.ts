@@ -1,5 +1,5 @@
 import express from "express";
-import { User, SqlQuery } from "../../types";
+import { User, SqlQuery } from "../types";
 import { initializeSession } from "../services/auth";
 import { insert, findUserByEmail, findUser } from "../repositories/users";
 import { encrypt } from "../services/encryption";

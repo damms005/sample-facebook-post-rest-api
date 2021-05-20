@@ -1,5 +1,5 @@
 import { executeQuery, isEmptySelectQueryResponse } from "../services/database";
-import { SqlQuery, User } from "../../types";
+import { SqlQuery, User } from "../types";
 import { buildQuery } from "../services/query_builder";
 
 export const insert = (user: any) => {
