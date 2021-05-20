@@ -153,7 +153,7 @@ function getUserForRegistration(request: express.Request): User {
 
 function sendPasswordResetLinkToUser(request, user: User, token: string): Promise<void> {
 	const parameters = {
-		link: getUrlFromPath(request, `/reset/${token}`),
+		link: getUrlFromPath(request, `auth/reset/${token}`),
 		...user,
 	};
 

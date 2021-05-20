@@ -18,6 +18,7 @@ router.post(
 	),
 	register
 );
+
 router.post(
 	"/login",
 	validate(
@@ -29,6 +30,7 @@ router.post(
 	),
 	login
 );
+
 router.post(
 	"/reset",
 	validate(
@@ -40,6 +42,7 @@ router.post(
 	),
 	resetPassword
 );
+
 router.get("/reset/:token", finalizePasswordResetToken);
 
 export default router;
