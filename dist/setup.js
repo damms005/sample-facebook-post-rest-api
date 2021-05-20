@@ -10,9 +10,7 @@ Promise.all([
     createTable("posts", getPostsTableSchemaDefinition()),
     createTable("post_likes", getPostLikesTableSchemaDefinition()),
     createTable("post_replies", getPostRepliesTableSchemaDefinition()),
-]).catch(function (error) {
-    console.log(error);
-});
+]);
 function createDatabase() {
     var query = query_builder_1.buildQuery("CREATE DATABASE IF NOT EXISTS `${process.env.DATABASE_DATABASE}`");
     return database_1.executeQuery(query);

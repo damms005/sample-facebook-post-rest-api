@@ -7,12 +7,13 @@ exports.executeQuery = void 0;
 var mysql2_1 = __importDefault(require("mysql2"));
 function getDatabaseConnection() {
     return new Promise(function (resolve, reject) {
-        var databaseConnection = mysql2_1.default.createConnection({
+        var connectionOptions = {
             host: process.env.DATABASE_HOST,
             user: process.env.DATABASE_USER,
             password: process.env.DATABASE_PASSWORD,
             database: process.env.DATABASE_DATABASE,
-        });
+        };
+        var databaseConnection = mysql2_1.default.createConnection(connectionOptions);
         databaseConnection.connect(function (error) {
             if (error) {
                 return reject(error);
@@ -37,7 +38,7 @@ function executeQuery(command) {
             });
         })
             .catch(function (error) {
-            resolve(error);
+            reject({ message: "Database error", error: error });
         });
     });
 }

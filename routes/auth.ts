@@ -18,8 +18,28 @@ router.post(
 	),
 	register
 );
-router.post("/login", login);
-router.post("/reset", resetPassword);
+router.post(
+	"/login",
+	validate(
+		{
+			email: [VALIDATION_RULE_REQUIRED, VALIDATION_RULE_EMAIL],
+			password: [VALIDATION_RULE_REQUIRED],
+		},
+		VALIDATION_SOURCE_POST
+	),
+	login
+);
+router.post(
+	"/reset",
+	validate(
+		{
+			email: [VALIDATION_RULE_REQUIRED, VALIDATION_RULE_EMAIL],
+			newPassword: [VALIDATION_RULE_REQUIRED],
+		},
+		VALIDATION_SOURCE_POST
+	),
+	resetPassword
+);
 router.get("/reset/:token", finalizePasswordResetToken);
 
 export default router;

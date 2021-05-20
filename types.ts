@@ -1,8 +1,10 @@
 export interface User {
+	id?: Number;
+	email: string;
 	firstname: string;
 	lastname: string;
-	email: string;
-	id?: Number;
+	password?: string;
+	password_reset_token_expires_at?: string;
 }
 
 export interface SqlQuery {

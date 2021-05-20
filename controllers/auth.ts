@@ -1,3 +1,4 @@
+import express from "express";
 import { User, SqlQuery } from "../types";
 import { initializeSession } from "../services/auth";
 import { insert, findUserByEmail, findUser } from "../repositories/users";
@@ -8,24 +9,25 @@ import crypto from "crypto";
 import { executeQuery } from "../services/database";
 import { getUrlFromPath } from "../services/routing";
 import { buildQuery } from "../services/query_builder";
-import { reportError } from "../services/error_reporting";
+import { SSL_OP_ALL } from "constants";
 
-export const register = (request, response) => {
-	const user: User = getUser(request);
+const AUTH_LOGIN_ERROR_MESSAGE = "Invalid login credentials. Please try again";
+
+export const register = (request: express.Request, response: express.Response) => {
+	const user: User = getUserForRegistration(request);
 	const { password } = request.body;
-	console.log("body: ", request.body);
 
-	encrypt(password)
-		.then((encryptedPassword) => {
-			Promise.all([insert({ ...user, password: encryptedPassword }), initializeSession(user)])
-				.then((sessionToken) => {
-					sendRegistrationNotificationToUser(user.email);
-					response.json({ message: "Registration successful", sessionToken });
-				})
-				.catch((error) => response.json({ message: "User registration failed", ...error }));
+	getUserHavingSameEmail(user.email)
+		.then((dbUserRecord) => {
+			response.status(400).json({ message: "User already exists with this email" });
 		})
-		.catch(() => {
-			reportError("Data encryption failed");
+		.catch((error) => {
+			if (error) {
+				response.status(400).json({ message: "An error occurred", error });
+				return;
+			}
+
+			storeUser(password, user, response);
 		});
 };
 
@@ -33,7 +35,7 @@ export const login = (request, response) => {
 	const { email, password } = request.body;
 
 	findUserByEmail(email)
-		.then((user: any) => {
+		.then((user: User) => {
 			bcrypt
 				.compare(password, user.password)
 				.then(() => {
@@ -44,11 +46,11 @@ export const login = (request, response) => {
 						.catch((error) => response.json({ message: "User registration failed", ...error }));
 				})
 				.catch((error) => {
-					response.status(400).json({ error: "Invalid login credentials. Please try again" });
+					response.status(400).json({ message: AUTH_LOGIN_ERROR_MESSAGE, error });
 				});
 		})
 		.catch((error) => {
-			response.status(401).json({ error });
+			response.status(401).json({ dd: SSL_OP_ALL, message: AUTH_LOGIN_ERROR_MESSAGE, error });
 		});
 };
 
@@ -74,9 +76,9 @@ export const finalizePasswordResetToken = (request, response) => {
 	const token = request.params.token;
 
 	findUser("password_reset_token", token)
-		.then((queryResult) => {
-			let userId = queryResult["id"];
-			let tokenExpiry = queryResult["password_reset_token_expires_at"];
+		.then((user: User) => {
+			let userId = user.id as Number;
+			let tokenExpiry = user.password_reset_token_expires_at;
 			if (isExpiredToken(tokenExpiry)) {
 				return response.status(503).json({ message: "Token expiry error" });
 			}
@@ -127,8 +129,8 @@ function initiatePasswordReset(request, token: string, email: string, encryptedN
 						resolve();
 					})
 					.catch((error) => {
+						console.log("go", user);
 						reject(error);
-						``;
 					});
 			})
 			.catch((error) => {
@@ -144,7 +146,7 @@ function sendRegistrationNotificationToUser(recipientEmail: string) {
 	sendEmail(recipientEmail, subject, mailBodyPlainText);
 }
 
-function getUser(request: any): User {
+function getUserForRegistration(request: express.Request): User {
 	const { firstname, lastname, email } = request.body;
 	return { firstname, lastname, email };
 }
@@ -185,13 +187,13 @@ function runPasswordUpdateDatabaseChanges(userId: Number): Promise<any[]> {
 	return Promise.all([changePassword(userId), nullifyPasswordResetColumns(userId)]);
 }
 
-function changePassword(userId: Number): Promise<void> {
+function changePassword(userId: Number): Promise<any> {
 	let query: SqlQuery = buildQuery("UPDATE users SET password = temporary_password WHERE user.id = ? ", [userId.toString()]);
 
 	return executeQuery(query);
 }
 
-function nullifyPasswordResetColumns(userId: Number): Promise<void> {
+function nullifyPasswordResetColumns(userId: Number): Promise<any> {
 	let query: SqlQuery = buildQuery(
 		"UPDATE users SET \
 		password_reset_token = NULL, \
@@ -215,6 +217,33 @@ export function getAuthenticatedUser(request): Promise<User> {
 					lastname: queryResult["lastname"],
 					firstname: queryResult["firstname"],
 				});
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+}
+
+function storeUser(password, user, response) {
+	encrypt(password)
+		.then((encryptedPassword) => {
+			Promise.all([insert({ ...user, password: encryptedPassword }), initializeSession(user)])
+				.then((sessionToken) => {
+					sendRegistrationNotificationToUser(user.email);
+					response.json({ message: "Registration successful" });
+				})
+				.catch((error) => response.json({ message: "User registration failed", ...error }));
+		})
+		.catch((error) => {
+			response.status(400).json({ error });
+		});
+}
+
+function getUserHavingSameEmail(email: string): Promise<User> {
+	return new Promise((resolve, reject) => {
+		findUserByEmail(email)
+			.then((user: User) => {
+				return resolve(user);
 			})
 			.catch((error) => {
 				reject(error);

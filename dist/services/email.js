@@ -17,7 +17,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getEmailHtmlTemplate = exports.sendEmail = void 0;
 var mail_1 = __importDefault(require("@sendgrid/mail"));
 var path_1 = require("path");
-require("dotenv").config();
+var error_reporting_1 = require("./error_reporting");
 var edge = require("edge.js").default;
 edge.mount(path_1.join(__dirname, "views"));
 var MAIL_PROCESSING_DELAY_IN_MILLISECONDS = 1000;
@@ -54,11 +54,8 @@ function processEmail(recipientEmail, subject, mailBodyHtml) {
     };
     mail_1.default
         .send(mail)
-        .then(function (response) {
-        console.log(response[0].statusCode);
-        console.log(response[0].headers);
-    })
+        .then(function (response) { })
         .catch(function (error) {
-        console.error(error);
+        error_reporting_1.reportError(error);
     });
 }

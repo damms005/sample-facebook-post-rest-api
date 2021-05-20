@@ -1,5 +1,6 @@
+import express from "express";
 import { body, query, param, validationResult, ValidationChain } from "express-validator";
-import { ValidationPayload, ValidationRule, ValidationRuleInputFieldMap, ValidationSource } from "../types";
+import { ValidationPayload, ValidationRule, ValidationSource } from "../types";
 import {
 	VALIDATION_RULE_EMAIL,
 	VALIDATION_RULE_NUMBER,
@@ -11,16 +12,16 @@ import {
 
 export const validate = (dataToValidate: ValidationPayload, source: ValidationSource) => {
 	let compiledValidationRules: Array<ValidationChain> = [] as any;
+	let inputFieldsToValidate = Object.keys(dataToValidate);
 
-	Object.keys(dataToValidate).forEach((inputFieldName) => {
+	inputFieldsToValidate.forEach((inputFieldName) => {
 		let validationRulesForInputField = dataToValidate[inputFieldName];
-
 		let validationChain: ValidationChain = getValidatorChain(source, inputFieldName, validationRulesForInputField);
 
 		compiledValidationRules.push(validationChain);
 	});
 
-	return compiledValidationRules;
+	return runValidations(compiledValidationRules);
 };
 
 function getValidatorChain(source, inputFieldName, validationRulesForInputField): ValidationChain {
@@ -28,15 +29,19 @@ function getValidatorChain(source, inputFieldName, validationRulesForInputField)
 
 	validationRulesForInputField.forEach((validationRule: ValidationRule) => {
 		if (validationRule == VALIDATION_RULE_REQUIRED) {
-			validationChain = validationChain.exists().notEmpty();
+			validationChain = validationChain
+				.exists()
+				.withMessage(`'${inputFieldName}' is required`)
+				.notEmpty()
+				.withMessage(`'${inputFieldName}' cannot be empty`);
 		}
 
 		if (validationRule == VALIDATION_RULE_EMAIL) {
-			validationChain = validationChain.isEmail();
+			validationChain = validationChain.normalizeEmail().isEmail().withMessage(`'${inputFieldName}' must be a valid email`);
 		}
 
 		if (validationRule == VALIDATION_RULE_NUMBER) {
-			validationChain = validationChain.isNumeric();
+			validationChain = validationChain.isNumeric().withMessage(`'${inputFieldName}' Must be a number`);
 		}
 	});
 
@@ -55,4 +60,19 @@ function bootValidationChain(source: ValidationSource, inputFieldName: string): 
 	if (source == VALIDATION_SOURCE_PARAMS) {
 		return param(inputFieldName).trim();
 	}
+}
+
+function runValidations(validations: Array<ValidationChain>) {
+	return async (request: express.Request, result: express.Response, next) => {
+		await Promise.all(validations.map((validation) => validation.run(request)));
+
+		const errors = validationResult(request);
+		if (errors.isEmpty()) {
+			return next();
+		}
+
+		result.status(400).json({
+			errors: errors.array(),
+		});
+	};
 }

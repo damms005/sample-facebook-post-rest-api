@@ -2,7 +2,6 @@ import sendgridMail from "@sendgrid/mail";
 import { join } from "path";
 import { reportError } from './error_reporting';
 
-require("dotenv").config();
 const edge = require("edge.js").default;
 edge.mount(join(__dirname, "views"));
 
@@ -35,7 +34,7 @@ function processEmail(recipientEmail: string, subject: string, mailBodyHtml: str
 	sendgridMail.setApiKey(process.env.SENDGRID_API_KEY as any);
 
 	const mail: any = {
-		from: process.env.TWILIO_VERIFIES_SENDER_EMAIL,
+		from: process.env.TWILIO_VERIFIED_SENDER_EMAIL,
 		to: recipientEmail,
 		subject,
 		html: mailBodyHtml,

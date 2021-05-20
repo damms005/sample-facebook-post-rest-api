@@ -24,7 +24,6 @@ var crypto_1 = __importDefault(require("crypto"));
 var database_1 = require("../services/database");
 var routing_1 = require("../services/routing");
 var query_builder_1 = require("../services/query_builder");
-var TOKEN_PASSWORD_SEPARATOR = "[:password:]";
 var register = function (request, response) {
     var user = getUser(request);
     var password = request.body.password;
@@ -37,8 +36,8 @@ var register = function (request, response) {
         })
             .catch(function (error) { return response.json(__assign({ message: "User registration failed" }, error)); });
     })
-        .catch(function () {
-        console.log("Data encryption failed");
+        .catch(function (error) {
+        response.status(400).json({ error: error });
     });
 };
 exports.register = register;
@@ -133,7 +132,6 @@ function initiatePasswordReset(request, token, email, encryptedNewPassword) {
             })
                 .catch(function (error) {
                 reject(error);
-                "";
             });
         })
             .catch(function (error) {

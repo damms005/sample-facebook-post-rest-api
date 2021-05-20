@@ -8,6 +8,7 @@ var auth_1 = __importDefault(require("./routes/auth"));
 var posts_1 = __importDefault(require("./routes/posts"));
 var post_likes_1 = __importDefault(require("./routes/post_likes"));
 var post_replies_1 = __importDefault(require("./routes/post_replies"));
+require("dotenv").config();
 var app = express_1.default();
 var PORT = process.env.PORT || 5000;
 app.use(express_1.default.json());

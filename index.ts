@@ -4,6 +4,8 @@ import postsRoutes from "./routes/posts";
 import postLikesRoutes from "./routes/post_likes";
 import postRepliesRoutes from "./routes/post_replies";
 
+require("dotenv").config();
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 

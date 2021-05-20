@@ -3,12 +3,14 @@ import { SqlQuery } from "../types";
 
 function getDatabaseConnection(): Promise<mysql.Connection> {
 	return new Promise((resolve, reject) => {
-		let databaseConnection = mysql.createConnection({
+		let connectionOptions = {
 			host: process.env.DATABASE_HOST,
 			user: process.env.DATABASE_USER,
 			password: process.env.DATABASE_PASSWORD,
 			database: process.env.DATABASE_DATABASE,
-		});
+		};
+
+		let databaseConnection = mysql.createConnection(connectionOptions);
 
 		databaseConnection.connect((error) => {
 			if (error) {
@@ -35,11 +37,15 @@ export function executeQuery(command: SqlQuery): Promise<any> {
 						return reject(error);
 					}
 
-					resolve({ results, fields });
+					resolve(results as any);
 				});
 			})
 			.catch((error) => {
-				resolve(error);
+				reject({ message: "Database error", error });
 			});
 	});
 }
+
+export const isEmptySelectQueryResponse = (selectQueryResult: any): boolean => {
+	return selectQueryResult.length == 0;
+};
